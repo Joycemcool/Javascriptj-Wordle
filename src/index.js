@@ -75,7 +75,7 @@ return state.grid[state.currentRow].reduce((prev, curr) => prev + curr);
 }//what's prev and curr?
 
 function isWordValid(word) {
-return dictionary.includes(word);
+    return dictionary.includes(word);
 }
   
 //   function getNumOfOccurrencesInWord(word, letter) {
@@ -99,8 +99,9 @@ return dictionary.includes(word);
 //   }
   
 function revealWord(guess) {
-const row = state.currentRow;
-// const animation_duration = 500; // ms
+    const row = state.currentRow;
+//WORDLE ANNIMATION BOX HEIGHT SHRIEKING TO ZERO THEN BACK TO NORMAL
+    const animation_duration = 500; // ms
 
     for (let i = 0; i < 5; i++) {
       const box = document.getElementById(`box${row}${i}`);
@@ -112,13 +113,14 @@ const row = state.currentRow;
 //       const numOfOccurrencesGuess = getNumOfOccurrencesInWord(guess, letter);
 //       const letterPosition = getPositionOfOccurrence(guess, letter, i);
   
-//       setTimeout(() => {
-//         if (
-//           numOfOccurrencesGuess > numOfOccurrencesSecret &&
-//           letterPosition > numOfOccurrencesSecret
-//         ) {
-//           box.classList.add('empty');
-//         } else {
+//TIMEOUT DEPENDENT ON THE INDEX OF THE CURRENT LETTER
+      setTimeout(() => {
+        // if (
+        //   numOfOccurrencesGuess > numOfOccurrencesSecret &&
+        //   letterPosition > numOfOccurrencesSecret
+        // ) {
+        //   box.classList.add('empty');
+        // } else {
           if (letter === state.secret[i]) {
             box.classList.add('right');
           } else if (state.secret.includes(letter)) {
@@ -126,24 +128,28 @@ const row = state.currentRow;
           } else {
             box.classList.add('empty');
           }
-        }
-//       }, ((i + 1) * animation_duration) / 2);
-  
-//       box.classList.add('animated');
-//       box.style.animationDelay = `${(i * animation_duration) / 2}ms`;
-    // }
+        // }
+      }, ((i + 1) * animation_duration) / 2);
+
+//ADD ANIMATED CLASS TO ANY BOX
+      box.classList.add('animated');
+
+//ANIMATION DELAY DEPEND ON THE INDEX OR THE POSITON OF THE LETTER
+      box.style.animationDelay = `${(i * animation_duration) / 2}ms`;
+    }
   
 // Check if win or lose
-const isWinner = state.secret === guess;
-const isGameOver = state.currentRow === 5;
+    const isWinner = state.secret === guess;
+    const isGameOver = state.currentRow === 5;
   
-//     setTimeout(() => {
-    if (isWinner) {
-    alert('Congratulations!');
-    } else if (isGameOver) {
-    alert(`Better luck next time! The word was ${state.secret}.`);
-    }
-//     }, 3 * animation_duration);
+//SCHEDULE THE FUNCTION TO BE EXECUTED AFTER A SPECIFIC OF TIME
+    setTimeout(() => {
+        if (isWinner) {
+        alert('Congratulations!');
+        } else if (isGameOver) {
+        alert(`Better luck next time! The word was ${state.secret}.`);
+        }
+    }, 3 * animation_duration);
 }
   
 //CHECK IF INPUT LETTER (REGULAR EXPRESSION)
