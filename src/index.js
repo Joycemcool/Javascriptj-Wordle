@@ -1,6 +1,8 @@
   //Store the data in a matrix, separate the game data from the ui
+const dictionary = ['earth','plane','crane','house'];
 
 const state = {
+    secret:dictionary[Math.floor(Math.random()*dictionary.length)],
     grid:Array(6).fill().map(() => Array(5).fill('')),
     currentRow:0,
     currentCol:0,
@@ -8,7 +10,7 @@ const state = {
 
 //Display the game state in the actual grid
 //Get the box from the dom and set the value of the text in the box
-  function updateGrid() {
+function updateGrid() {
     for (let i = 0; i < state.grid.length; i++) {
       for (let j = 0; j < state.grid[i].length; j++) {
         const box = document.getElementById(`box${i}${j}`);
@@ -41,42 +43,40 @@ function drawGrid(container) {
   }
 
 
-  
+function registerKeyboardEvents() {
+document.body.onkeydown = (e) => {
+    const key = e.key;
+    if (key === 'Enter') {
+    if (state.currentCol === 5) {
+// Check if input 5 letters
+        const word = getCurrentWord();
+        if (isWordValid(word)) {
+        revealWord(word);//Tell the player if the position right or wrong
+        state.currentRow++;
+        state.currentCol = 0;
+        } else {
+        alert('Not a valid word.');
+        }
+    }
+    }
+    if (key === 'Backspace') {
+    removeLetter();
+    }
+    if (isLetter(key)) {
+    addLetter(key);
+    }
 
+    updateGrid();
+};
+}
   
-//   function registerKeyboardEvents() {
-//     document.body.onkeydown = (e) => {
-//       const key = e.key;
-//       if (key === 'Enter') {
-//         if (state.currentCol === 5) {
-//           const word = getCurrentWord();
-//           if (isWordValid(word)) {
-//             revealWord(word);
-//             state.currentRow++;
-//             state.currentCol = 0;
-//           } else {
-//             alert('Not a valid word.');
-//           }
-//         }
-//       }
-//       if (key === 'Backspace') {
-//         removeLetter();
-//       }
-//       if (isLetter(key)) {
-//         addLetter(key);
-//       }
-  
-//       updateGrid();
-//     };
-//   }
-  
-//   function getCurrentWord() {
-//     return state.grid[state.currentRow].reduce((prev, curr) => prev + curr);
-//   }
-  
-//   function isWordValid(word) {
-//     return dictionary.includes(word);
-//   }
+function getCurrentWord() {
+return state.grid[state.currentRow].reduce((prev, curr) => prev + curr);
+}//what's prev and curr?
+
+function isWordValid(word) {
+return dictionary.includes(word);
+}
   
 //   function getNumOfOccurrencesInWord(word, letter) {
 //     let result = 0;
@@ -98,13 +98,13 @@ function drawGrid(container) {
 //     return result;
 //   }
   
-//   function revealWord(guess) {
-//     const row = state.currentRow;
-//     const animation_duration = 500; // ms
-  
-//     for (let i = 0; i < 5; i++) {
-//       const box = document.getElementById(`box${row}${i}`);
-//       const letter = box.textContent;
+function revealWord(guess) {
+const row = state.currentRow;
+// const animation_duration = 500; // ms
+
+    for (let i = 0; i < 5; i++) {
+      const box = document.getElementById(`box${row}${i}`);
+      const letter = box.textContent;
 //       const numOfOccurrencesSecret = getNumOfOccurrencesInWord(
 //         state.secret,
 //         letter
@@ -119,53 +119,58 @@ function drawGrid(container) {
 //         ) {
 //           box.classList.add('empty');
 //         } else {
-//           if (letter === state.secret[i]) {
-//             box.classList.add('right');
-//           } else if (state.secret.includes(letter)) {
-//             box.classList.add('wrong');
-//           } else {
-//             box.classList.add('empty');
-//           }
-//         }
+          if (letter === state.secret[i]) {
+            box.classList.add('right');
+          } else if (state.secret.includes(letter)) {
+            box.classList.add('wrong');
+          } else {
+            box.classList.add('empty');
+          }
+        }
 //       }, ((i + 1) * animation_duration) / 2);
   
 //       box.classList.add('animated');
 //       box.style.animationDelay = `${(i * animation_duration) / 2}ms`;
-//     }
+    // }
   
-//     const isWinner = state.secret === guess;
-//     const isGameOver = state.currentRow === 5;
+// Check if win or lose
+const isWinner = state.secret === guess;
+const isGameOver = state.currentRow === 5;
   
 //     setTimeout(() => {
-//       if (isWinner) {
-//         alert('Congratulations!');
-//       } else if (isGameOver) {
-//         alert(`Better luck next time! The word was ${state.secret}.`);
-//       }
+    if (isWinner) {
+    alert('Congratulations!');
+    } else if (isGameOver) {
+    alert(`Better luck next time! The word was ${state.secret}.`);
+    }
 //     }, 3 * animation_duration);
-//   }
+}
   
-//   function isLetter(key) {
-//     return key.length === 1 && key.match(/[a-z]/i);
-//   }
+//CHECK IF INPUT LETTER (REGULAR EXPRESSION)
+function isLetter(key) {
+return key.length === 1 && key.match(/[a-z]/i);
+}
   
-//   function addLetter(letter) {
-//     if (state.currentCol === 5) return;
-//     state.grid[state.currentRow][state.currentCol] = letter;
-//     state.currentCol++;
-//   }
+//ADD THE LETTER TO THE GRID
+function addLetter(letter) {
+if (state.currentCol === 5) return;
+state.grid[state.currentRow][state.currentCol] = letter;
+state.currentCol++;
+}
   
-//   function removeLetter() {
-//     if (state.currentCol === 0) return;
-//     state.grid[state.currentRow][state.currentCol - 1] = '';
-//     state.currentCol--;
-//   }
+//REMOVE THE LETTER FROM THE GRID, WHY?
+function removeLetter() {
+if (state.currentCol === 0) return;
+state.grid[state.currentRow][state.currentCol - 1] = '';
+state.currentCol--;
+}
+
+function startup() {
+const game = document.getElementById('game');
+drawGrid(game);
+
+registerKeyboardEvents();
+console.log(state.secret);
+}
   
-  function startup() {
-    const game = document.getElementById('game');
-    drawGrid(game);
-  
-    // registerKeyboardEvents();
-  }
-  
-  startup();
+startup();
