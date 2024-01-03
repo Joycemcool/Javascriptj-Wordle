@@ -1,6 +1,7 @@
   //Store the data in a matrix, separate the game data from the ui
 const dictionary = ['earth','plane','crane','house'];
 
+// DECLARE STATE CLASS 
 const state = {
     secret:dictionary[Math.floor(Math.random()*dictionary.length)],
     grid:Array(6).fill().map(() => Array(5).fill('')),
@@ -19,6 +20,7 @@ function updateGrid() {
     }
   }
 
+  // DEFINE A LETTER BOX
 function drawBox(container, row, col, letter = '') {
     const box = document.createElement('div');
     box.className = 'box';
@@ -29,6 +31,7 @@ function drawBox(container, row, col, letter = '') {
     return box;
   }
 
+// DRAW GAME GRID
 function drawGrid(container) {
     const grid = document.createElement('div');
     grid.className = 'grid';
@@ -43,39 +46,73 @@ function drawGrid(container) {
   }
 
 
-function registerKeyboardEvents() {
-document.body.onkeydown = (e) => {
-    const key = e.key;
-    if (key === 'Enter') {
-    if (state.currentCol === 5) {
-// Check if input 5 letters
-        const word = getCurrentWord();
-        if (isWordValid(word)) {
-        revealWord(word);//Tell the player if the position right or wrong
-        state.currentRow++;
-        state.currentCol = 0;
-        } else {
-        alert('Not a valid word.');
-        }
-    }
-    }
-    if (key === 'Backspace') {
-    removeLetter();
-    }
-    if (isLetter(key)) {
-    addLetter(key);
-    }
+async function registerKeyboardEvents() {
+  document.body.onkeydown = async (e) => {
+      const key = e.key;
+      if (key === 'Enter') {
+        if (state.currentCol === 5) {
+          var flag;
 
-    updateGrid();
-};
+            // Check if input 5 letters
+            const word = getCurrentWord();
+            flag = await checkWordValidity(word);
+            // if(await checkWordValidity(word))
+            // { 
+            
+              console.log(flag);
+
+              // updateGrid();
+            // }    
+            if(flag){
+              revealWord(word);//Tell the player if the position right or wrong
+              state.currentRow++;
+              state.currentCol = 0;
+            }
+            else{
+              removeRow();
+            }
+
+        }
+      }
+
+      if (key === 'Backspace') {
+        removeLetter();
+      }
+
+      if (isLetter(key)) {
+        addLetter(key);
+      }
+      
+      updateGrid();
+  }
+}
+
+async function checkWordValidity(word){
+  const fetchUrl = 'https://api.dictionaryapi.dev/api/v2/entries/en/'+word;
+
+  try{
+    const response = await fetch(fetchUrl);
+    const data = await response.json();
+    console.log(data);
+    if(data.title === 'No Definitions Found'){
+      alert('Not a valid word');
+      return false;
+    }
+    else return true;
+  }
+  catch(error){
+    console.error(error);
+    console.log('false 1');
+    return false;
+  }
 }
   
 function getCurrentWord() {
-return state.grid[state.currentRow].reduce((prev, curr) => prev + curr);
+  return state.grid[state.currentRow].reduce((prev, curr) => prev + curr);
 }//what's prev and curr?
 
 function isWordValid(word) {
-    return dictionary.includes(word);
+    return dictionary.incluereredes(word);
 }
   
 //   function getNumOfOccurrencesInWord(word, letter) {
@@ -100,7 +137,8 @@ function isWordValid(word) {
   
 function revealWord(guess) {
     const row = state.currentRow;
-//WORDLE ANNIMATION BOX HEIGHT SHRIEKING TO ZERO THEN BACK TO NORMAL
+
+    //WORDLE ANNIMATION BOX HEIGHT SHRIEKING TO ZERO THEN BACK TO NORMAL
     const animation_duration = 500; // ms
 
     for (let i = 0; i < 5; i++) {
@@ -146,6 +184,8 @@ function revealWord(guess) {
     setTimeout(() => {
         if (isWinner) {
         alert('Congratulations!');
+        location.reload();
+//update grid here!
         } else if (isGameOver) {
         alert(`Better luck next time! The word was ${state.secret}.`);
         }
@@ -154,29 +194,36 @@ function revealWord(guess) {
   
 //CHECK IF INPUT LETTER (REGULAR EXPRESSION)
 function isLetter(key) {
-return key.length === 1 && key.match(/[a-z]/i);
+  return key.length === 1 && key.match(/[a-z]/i);
 }
   
 //ADD THE LETTER TO THE GRID
 function addLetter(letter) {
-if (state.currentCol === 5) return;
-state.grid[state.currentRow][state.currentCol] = letter;
-state.currentCol++;
+  if (state.currentCol === 5) return;
+  state.grid[state.currentRow][state.currentCol] = letter;
+  state.currentCol++;
 }
   
-//REMOVE THE LETTER FROM THE GRID, WHY?
+//REMOVE THE LETTER FROM THE GRID
 function removeLetter() {
-if (state.currentCol === 0) return;
-state.grid[state.currentRow][state.currentCol - 1] = '';
-state.currentCol--;
+  if (state.currentCol === 0) return;
+  state.grid[state.currentRow][state.currentCol - 1] = '';
+  state.currentCol--;
 }
 
+function removeRow(){
+  for(let i=state.currentCol;i>0;i--){
+    removeLetter();
+  }
+}
+
+//DRWA GAME GRID 
 function startup() {
-const game = document.getElementById('game');
-drawGrid(game);
-
-registerKeyboardEvents();
-console.log(state.secret);
+  const game = document.getElementById('game');
+  drawGrid(game); //DRWA GAME GRID 
+  registerKeyboardEvents();//LISTEN TO THE KEY DOWN EVENT
+  console.log(state.secret);
 }
-  
+
+//CALL GAME STARTUP FUNCTION
 startup();
